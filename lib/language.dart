@@ -1,47 +1,6 @@
 import 'package:prism/grammar.dart';
 import 'package:prism/rule.dart';
-
-/// Um token armazena informações de alguma regra casada durante o highlight.
-abstract class _Token {
-  final String name;
-  final List<_Token> content;
-  final int length;
-  final bool greedy;
-
-  _Token(this.name, this.content, this.length, this.greedy);
-
-  static String _stringify(_Token token) {
-    if (token is _StringToken) {
-      return token.value;
-    } else {
-      return token.text();
-    }
-  }
-
-  /// Obtém o texto da regra casada.
-  String text() {
-    if (this is _StringToken) {
-      return (this as _StringToken).value;
-    } else {
-      final buffer = StringBuffer();
-      for (_Token token in content) buffer.write(_stringify(token));
-      return buffer.toString();
-    }
-  }
-}
-
-class _StringToken extends _Token {
-  final String value;
-
-  _StringToken(this.value) : super("text", const [], value.length, false);
-}
-
-class _RuleToken extends _Token {
-  final Rule rule;
-
-  _RuleToken(this.rule, String name, List<_Token> content, int length)
-      : super(name, content, length, rule.greedy);
-}
+import 'package:prism/token.dart';
 
 typedef HighlightMapper<T> = T Function(
   String name,
@@ -52,13 +11,13 @@ typedef HighlightMapper<T> = T Function(
 
 /// Representa uma linguagem.
 abstract class Language extends Grammar {
-  static final _nonWhitespaceRegex = RegExp(r"\S+");
+  // static final _nonWhitespaceRegex = RegExp(r"\S+");
 
   Language({
     Grammar rest,
   }) : super(rest: rest);
 
-  /// TODO: Uma rule pode ter uma parent???
+  /*
   List<T> highlight<T>(
     String text, {
     bool ignoreWhitespaces = false,
@@ -70,6 +29,7 @@ abstract class Language extends Grammar {
     for (final token in tokens) {
       final text = token.text();
       final name = token.name;
+      print("$token");
       final end = start + token.length;
       // Ignora espaços.
       if (!ignoreWhitespaces || _nonWhitespaceRegex.hasMatch(text)) {
@@ -79,8 +39,11 @@ abstract class Language extends Grammar {
     }
     return res;
   }
+  */
 
-  List<_Token> _tokenize(
+  List<Token> tokenize(String text) => _tokenize(text, this);
+
+  List<Token> _tokenize(
     String text,
     Grammar grammar,
   ) {
@@ -89,14 +52,14 @@ abstract class Language extends Grammar {
       grammar.combineWith(grammar.rest);
     }
 
-    final List buffer = <_Token>[_StringToken(text)];
+    final List buffer = <Token>[StringToken(text)];
     _matchGrammar(text, buffer, grammar, 0, 0, false);
     return buffer;
   }
 
   void _matchGrammar(
     String text,
-    List<_Token> buffer,
+    List<Token> buffer,
     Grammar grammar,
     int index,
     int startPos,
@@ -123,13 +86,13 @@ abstract class Language extends Grammar {
         var sair = false;
 
         while (i < buffer.length && !sair) {
-          if (buffer[i] is _RuleToken) {
+          if (buffer[i] is RuleToken) {
             pos += buffer[i].length;
             i++;
             continue;
           }
 
-          var str = (buffer[i] as _StringToken).value;
+          var str = (buffer[i] as StringToken).value;
 
           // Something went terribly wrong, ABORT, ABORT!
           if (buffer.length > text.length) {
@@ -155,7 +118,7 @@ abstract class Language extends Grammar {
 
             while (k < len &&
                 (p < to ||
-                    (buffer[k] is _StringToken && !buffer[k - 1].greedy))) {
+                    (buffer[k] is StringToken && !buffer[k - 1].greedy))) {
               p += buffer[k].length;
               // Move the index i to the element in buffer that is closest to from
               if (from >= p) {
@@ -167,7 +130,7 @@ abstract class Language extends Grammar {
             }
 
             // If strarr[i] is a Token, then the match starts inside another Token, which is invalid
-            if (buffer[i] is _RuleToken) {
+            if (buffer[i] is RuleToken) {
               pos += buffer[i].length;
               i++;
               continue;
@@ -201,26 +164,26 @@ abstract class Language extends Grammar {
           final before = str.substring(0, from);
           final after = str.substring(to);
           final removeStart = i;
-          final args = List<_Token>();
+          final args = List<Token>();
 
           if (before.isNotEmpty) {
             i++;
             pos += before.length;
-            args.add(_StringToken(before));
+            args.add(StringToken(before));
           }
 
-          List<_Token> content;
+          List<Token> content;
           if (rule.inside != null && rule.inside.isNotEmpty) {
             content = _tokenize(matchStr, rule.inside);
           } else {
-            content = [_StringToken(matchStr)];
+            content = [StringToken(matchStr)];
           }
 
-          final token = _RuleToken(rule, name, content, matchStr.length);
+          final token = RuleToken(rule, name, content, matchStr.length);
           args.add(token);
 
           if (after.isNotEmpty) {
-            args.add(_StringToken(after));
+            args.add(StringToken(after));
           }
 
           for (var x = 0; x < delNum; x++) {
