@@ -1,5 +1,6 @@
 import 'package:prism/grammar.dart';
 import 'package:prism/rule.dart';
+import 'package:prism/span.dart';
 import 'package:prism/token.dart';
 
 typedef HighlightMapper<T> = T Function(
@@ -15,29 +16,69 @@ abstract class Language extends Grammar {
     Grammar rest,
   }) : super(rest: rest);
 
-  List<Token> tokenize(String text) => _tokenize(text, this);
+  List<Span> highlightText(String text) => _highlight(tokenize(text), const {});
 
-  List<Token> _tokenize(
+  List<Span> _highlight(List<Token> tokens, Set<String> parents) {
+    final out = List<Span>();
+
+    for (final item in tokens) {
+      if (item is StringToken) {
+        // Nada.
+        if (item.value.length == 0) {
+          continue;
+        }
+        // Token.
+        else {
+          final name = parents.isNotEmpty ? parents.last : "text";
+
+          out.add(Span(
+            value: item.value,
+            aliases: {
+              ...parents,
+              name,
+            },
+          ));
+        }
+      }
+      // Composição de outros tokens.
+      else {
+        out.addAll(_highlight(item.content, {
+          if (parents.isNotEmpty) ...parents,
+          item.name,
+        }));
+      }
+    }
+
+    return out;
+  }
+
+  List<Token> tokenize(String text) => _tokenize(text: text, grammar: this);
+
+  List<Token> _tokenize({
     String text,
     Grammar grammar,
-  ) {
+  }) {
     // rest representa o resto do rule que pode estar definido em outro lugar.
     if (grammar.rest != null) {
       grammar.combineWith(grammar.rest);
     }
 
     final List buffer = <Token>[StringToken(text)];
-    _matchGrammar(text, buffer, grammar, 0, 0, false);
+    _matchGrammar(
+      text: text,
+      buffer: buffer,
+      grammar: grammar,
+    );
     return buffer;
   }
 
-  void _matchGrammar(
+  void _matchGrammar({
     String text,
     List<Token> buffer,
     Grammar grammar,
-    int index,
-    int startPos,
-    bool oneshot, {
+    int index = 0,
+    int startPos = 0,
+    bool oneshot = false,
     String target,
   }) {
     for (final item in grammar.entries) {
@@ -153,7 +194,10 @@ abstract class Language extends Grammar {
 
           List<Token> content;
           if (rule.inside != null && rule.inside.isNotEmpty) {
-            content = _tokenize(matchStr, rule.inside);
+            content = _tokenize(
+              text: matchStr,
+              grammar: rule.inside,
+            );
           } else {
             content = [StringToken(matchStr)];
           }
@@ -174,7 +218,15 @@ abstract class Language extends Grammar {
           }
 
           if (delNum != 1) {
-            _matchGrammar(text, buffer, grammar, i, pos, true, target: name);
+            _matchGrammar(
+              text: text,
+              buffer: buffer,
+              grammar: grammar,
+              index: i,
+              startPos: pos,
+              oneshot: true,
+              target: name,
+            );
           }
 
           if (oneshot) {

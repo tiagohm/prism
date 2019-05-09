@@ -2,56 +2,40 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prism/language.dart';
-import 'package:prism/token.dart';
+import 'package:prism/span.dart';
 
 void testFeature(Language language, String name) {
   test(name, () {
     name = name.replaceAll(" ", "_");
     final languageName = "${language.runtimeType}".toLowerCase();
     final filename = "$name.text".toLowerCase();
-    final inputText =
-        File("./test/input/$languageName/$filename").readAsStringSync();
-    final expectedOutputText =
-        File("./test/output/$languageName/$filename").readAsStringSync();
-    final actualOutputText = _prettyPrint(language.tokenize(inputText));
+    final inputText = File("./test/input/$languageName/$filename")
+        .readAsStringSync()
+        .replaceAll("\r\n", "\n");
+    final expectedOutputText = File("./test/output/$languageName/$filename")
+        .readAsStringSync()
+        .replaceAll("\r\n", "\n");
+    final spans = language.highlightText(inputText);
+    print(spans);
+    final actualOutputText = _prettyPrint(spans);
     expect(actualOutputText, expectedOutputText);
   });
 }
 
-String _prettyPrint(List<Token> tokens, [Token parent]) {
+String _prettyPrint(List<Span> spans) {
   final out = StringBuffer();
 
-  for (final item in tokens) {
-    if (item is StringToken) {
-      // Nada.
-      if (item.value.length == 0) {
-        continue;
-      }
-      // Quebra de linha.
-      else if (item.value == "\n") {
-        out.write(item.value);
-      }
-      // Token.
-      else {
-        if (item.name != "text") {
-          out.writeln(item.name);
-        } else if (parent != null) {
-          out.writeln(parent.name);
-        } else {
-          out.writeln("text");
-        }
+  for (final span in spans) {
+    final name = span.aliases.last;
 
-        // Vários espaços em branco.
-        if (item.value.trim().length == 0) {
-          out.writeln("[${item.value.length}]");
-        } else {
-          out.writeln(item.value);
-        }
-      }
-    }
-    // Composição de outros tokens.
-    else {
-      out.write(_prettyPrint(item.content, item));
+    final trimmedValue = span.value.trim();
+    // Quebra de linha.
+    if (trimmedValue.isEmpty) {
+      // out.writeln(name);
+      // out.writeln("[${span.value.length}]");
+    } else {
+      out.writeln(name);
+      out.writeln(span.value);
     }
   }
 
