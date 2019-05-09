@@ -15,8 +15,10 @@ void testFeature(Language language, String name) {
     final expectedOutputText = File("./test/output/$languageName/$filename")
         .readAsStringSync()
         .replaceAll("\r\n", "\n");
+    final timer = Stopwatch()..start();
     final spans = language.highlightText(inputText);
-    print(spans);
+    timer.stop();
+    print("Time: ${timer.elapsedMicroseconds} us");
     final actualOutputText = _prettyPrint(spans);
     expect(actualOutputText, expectedOutputText);
   });

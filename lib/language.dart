@@ -120,7 +120,7 @@ abstract class Language extends Grammar {
           if (greedy && i != buffer.length - 1) {
             matches = regex.allMatches(text, pos);
 
-            if (matches == null || matches.length == 0) {
+            if (matches.isEmpty) {
               sair = true;
               continue;
             }
@@ -158,18 +158,16 @@ abstract class Language extends Grammar {
             delNum = k - i;
           } else {
             matches = regex.allMatches(str, 0);
-            matchIndex = (matches == null || matches.length == 0)
-                ? 0
-                : matches.first.start;
+            matchIndex = matches.isEmpty ? 0 : matches.first.start;
             delNum = 1;
           }
 
-          if ((matches == null || matches.length == 0) && oneshot) {
+          if (matches.isEmpty && oneshot) {
             sair = true;
             continue;
           }
 
-          if (matches == null || matches.length == 0) {
+          if (matches.isEmpty) {
             pos += buffer[i].length;
             i++;
             continue;
