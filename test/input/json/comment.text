@@ -1,0 +1,6 @@
+{
+  // Line comment
+  "//": "//",
+  /* Block comment */
+  "/*": "*/"
+}

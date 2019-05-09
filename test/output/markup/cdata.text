@@ -1,0 +1,6 @@
+cdata
+<![CDATA[ foo bar baz ]]>
+cdata
+<![CDATA[
+foo bar baz
+]]>
