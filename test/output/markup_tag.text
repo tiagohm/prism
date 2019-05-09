@@ -1,65 +1,66 @@
-[
-	["tag", [
-		["tag", [
-			["punctuation", "<"],
-			"p"
-		]],
-		["punctuation", ">"]
-	]],
-	["tag", [
-        ["tag", [
-            ["punctuation", "</"],
-            "p"
-        ]],
-        ["punctuation", ">"]
-    ]],
+punctuation
+<
+tag
+p
+punctuation
+>
+punctuation
+</
+tag
+p
+punctuation
+>
 
-    ["tag", [
-		["tag", [
-			["punctuation", "<"],
-			"div"
-		]],
-		["punctuation", ">"]
-	]],
-	"dummy",
-	["tag", [
-		["tag", [
-			["punctuation", "</"],
-			"div"
-		]],
-		["punctuation", ">"]
-	]],
+punctuation
+<
+tag
+div
+punctuation
+>
+text
+dummy
+punctuation
+</
+tag
+div
+punctuation
+>
 
-	["tag", [
-		["tag", [
-			["punctuation", "<"],
-			"div"
-		]],
-		["punctuation", ">"]
-	]],
-	["tag", [
-		["tag", [
-			["punctuation", "</"],
-			"div"
-		]],
-		["punctuation", ">"]
-	]],
+punctuation
+<
+tag
+div
 
-	["tag", [
-		["tag", [
-			["punctuation", "<"],
-			["namespace", "foo:"],
-			"bar"
-		]],
-		["punctuation", ">"]
-	]],
-	["tag", [
-		["tag", [
-			["punctuation", "</"],
-			["namespace", "foo:"],
-			"bar"
-		]],
-		["punctuation", ">"]
-	]],
-	"\r\n<div"
-]
+punctuation
+>
+text
+[1]
+punctuation
+</
+tag
+div
+
+punctuation
+>
+
+punctuation
+<
+namespace
+foo:
+tag
+bar
+punctuation
+>
+text
+[1]
+punctuation
+</
+namespace
+foo:
+tag
+bar
+punctuation
+>
+text
+
+<div

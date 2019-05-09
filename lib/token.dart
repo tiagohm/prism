@@ -21,17 +21,17 @@ abstract class Token {
       return buffer.toString();
     }
   }
-
-  @override
-  String toString() {
-    return "${this.runtimeType}: {name: $name, content: $content, greedy: $greedy}";
-  }
 }
 
 class StringToken extends Token {
   final String value;
 
   StringToken(this.value) : super("text", const [], value.length, false);
+
+  @override
+  String toString() {
+    return "String: {name: $name, value: $value}";
+  }
 }
 
 class RuleToken extends Token {
@@ -43,4 +43,9 @@ class RuleToken extends Token {
     List<Token> content,
     int length,
   ) : super(name, content, length, rule.greedy);
+
+  @override
+  String toString() {
+    return "$Rule: {name: $name, content: $content}";
+  }
 }

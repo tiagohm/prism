@@ -11,35 +11,9 @@ typedef HighlightMapper<T> = T Function(
 
 /// Representa uma linguagem.
 abstract class Language extends Grammar {
-  // static final _nonWhitespaceRegex = RegExp(r"\S+");
-
   Language({
     Grammar rest,
   }) : super(rest: rest);
-
-  /*
-  List<T> highlight<T>(
-    String text, {
-    bool ignoreWhitespaces = false,
-    HighlightMapper<T> mapper,
-  }) {
-    final res = List<T>();
-    final tokens = _tokenize(text, this);
-    var start = 0;
-    for (final token in tokens) {
-      final text = token.text();
-      final name = token.name;
-      print("$token");
-      final end = start + token.length;
-      // Ignora espaços.
-      if (!ignoreWhitespaces || _nonWhitespaceRegex.hasMatch(text)) {
-        res.add(mapper(name, text, start, end));
-      }
-      start += text.length;
-    }
-    return res;
-  }
-  */
 
   List<Token> tokenize(String text) => _tokenize(text, this);
 
@@ -77,6 +51,7 @@ abstract class Language extends Grammar {
       for (final rule in rules) {
         final greedy = rule.greedy;
         final regex = rule.pattern;
+        final lookbehind = rule.lookbehind;
 
         var i = index;
         var pos = startPos;
@@ -109,7 +84,8 @@ abstract class Language extends Grammar {
               continue;
             }
 
-            final from = matches.first.start;
+            final from = matches.first.start +
+                (lookbehind ? matches.first.group(1).length : 0);
             final to = matches.first.start + matches.first.group(0).length;
             var k = i;
             var p = pos;
@@ -158,8 +134,11 @@ abstract class Language extends Grammar {
             continue;
           }
 
-          final from = matchIndex;
-          final matchStr = matches.first.group(0);
+          final lookbehindLength =
+              lookbehind ? matches.first.group(1)?.length ?? 0 : 0;
+
+          final from = matchIndex + lookbehindLength;
+          final matchStr = matches.first.group(0).substring(lookbehindLength);
           final to = from + matchStr.length;
           final before = str.substring(0, from);
           final after = str.substring(to);

@@ -1,0 +1,35 @@
+punctuation
+{
+text
+[3]
+comment
+// Line comment
+text
+[3]
+property
+"//"
+operator
+:
+text
+[1]
+string
+"//"
+punctuation
+,
+text
+[3]
+comment
+/* Block comment */
+text
+[3]
+property
+"/*"
+operator
+:
+text
+[1]
+string
+"*/"
+
+punctuation
+}

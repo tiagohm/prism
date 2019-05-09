@@ -4,19 +4,19 @@ import 'package:prism/grammar.dart';
 class Rule {
   final RegExp pattern;
   final bool greedy;
+   final bool lookbehind;
   final Grammar inside;
 
   Rule(
     String pattern, {
     bool caseSensitive = true,
     bool multiLine = false,
-    bool greedy = false,
-    Grammar inside,
+    this.greedy = false,
+    this.lookbehind = false,
+    this.inside,
   })  : pattern = RegExp(
           pattern,
           caseSensitive: caseSensitive,
           multiLine: multiLine,
-        ),
-        greedy = greedy,
-        inside = inside;
+        );
 }

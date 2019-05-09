@@ -49,7 +49,7 @@ class Markup extends Language {
                   Rule("^="),
                   Rule(
                     r"""^(\s*)["']|["']$""",
-                    //TODO: lookbehind: true,
+                    lookbehind: true,
                   ),
                 ],
             ),

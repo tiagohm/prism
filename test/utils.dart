@@ -6,44 +6,52 @@ import 'package:prism/token.dart';
 
 void testFeature(Language language, String name) {
   test(name, () {
-    final inputText =
-        File("./test/input/${language.runtimeType}_$name.text".toLowerCase()).absolute
-            .readAsStringSync();
+    name = name.replaceAll(" ", "_");
+    final filename = "${language.runtimeType}_$name.text".toLowerCase();
+    final inputText = File("./test/input/$filename").readAsStringSync();
     final expectedOutputText =
-        File("./test/input/${language.runtimeType}_$name.text".toLowerCase()).absolute
-            .readAsStringSync();
-    final actualOutputText = _prettyPrint(language.tokenize(inputText), 0);
-    print(actualOutputText);
+        File("./test/output/$filename").readAsStringSync();
+    final actualOutputText = _prettyPrint(language.tokenize(inputText));
+    expect(actualOutputText, expectedOutputText);
   });
 }
 
-String _prettyPrint(List<Token> tokenStream, [int indentationLevel = 1]) {
-  const indentChar = '\t';
-
-  // can't use tabs because the console will convert one tab to four spaces
-  final indentation = List(indentationLevel + 1).join(indentChar);
-
+String _prettyPrint(List<Token> tokens, [Token parent]) {
   final out = StringBuffer();
-  out.write("[\n");
-  var i = 0;
-  for (final item in tokenStream) {
-    out.write(indentation);
 
+  for (final item in tokens) {
     if (item is StringToken) {
-      out.write('"${item.value}"');
-    } else {
-      final name = item.name;
-      final content = item.content;
+      // Nada.
+      if (item.value.length == 0) {
+        continue;
+      }
+      // Quebra de linha.
+      else if (item.value == "\n") {
+        out.write(item.value);
+      }
+      // Token.
+      else {
+        if (item.name != "text") {
+          out.writeln(item.name);
+        } else if (parent != null) {
+          out.writeln(parent.name);
+        } else {
+          out.writeln("text");
+        }
 
-      out.write('["$name", ');
-      out.write(_prettyPrint(content, indentationLevel + 1));
-      out.write(']');
+        // Vários espaços em branco.
+        if (item.value.trim().length == 0) {
+          out.writeln("[${item.value.length}]");
+        } else {
+          out.writeln(item.value);
+        }
+      }
     }
-
-    final lineEnd = (i == tokenStream.length - 1) ? '\n' : ',\n';
-    out.write(lineEnd);
+    // Composição de outros tokens.
+    else {
+      out.write(_prettyPrint(item.content, item));
+    }
   }
 
-  out.write(indentation.substring(indentChar.length) + ']');
   return out.toString();
 }
