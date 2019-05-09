@@ -16,10 +16,18 @@ void main() {
     testFeature(json, "Boolean");
     testFeature(jsonWithComments, "Comment");
     testFeature(json, "Number");
+    testFeature(json, "Null");
+    testFeature(json, "Property");
+    testFeature(json, "String");
   });
 
   group('Markup', () {
     testFeature(markup, "Tag");
     testFeature(markup, "Tag Attribute");
+    testFeature(markup, "CDATA");
+    testFeature(markup, "Comment");
+    testFeature(markup, "Doctype");
+    testFeature(markup, "Entity");
+    testFeature(markup, "Prolog");
   });
 }

@@ -1,0 +1,14 @@
+string
+""
+
+string
+"foo"
+
+string
+"foo\"bar\"baz"
+
+string
+"\u2642\\ "
+
+string
+"\""

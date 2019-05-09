@@ -7,10 +7,12 @@ import 'package:prism/token.dart';
 void testFeature(Language language, String name) {
   test(name, () {
     name = name.replaceAll(" ", "_");
-    final filename = "${language.runtimeType}_$name.text".toLowerCase();
-    final inputText = File("./test/input/$filename").readAsStringSync();
+    final languageName = "${language.runtimeType}".toLowerCase();
+    final filename = "$name.text".toLowerCase();
+    final inputText =
+        File("./test/input/$languageName/$filename").readAsStringSync();
     final expectedOutputText =
-        File("./test/output/$filename").readAsStringSync();
+        File("./test/output/$languageName/$filename").readAsStringSync();
     final actualOutputText = _prettyPrint(language.tokenize(inputText));
     expect(actualOutputText, expectedOutputText);
   });
