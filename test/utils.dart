@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:prism/language.dart';
 import 'package:prism/span.dart';
+import 'package:test/test.dart';
 
 void testFeature(Language language, String name) {
   test(name, () {

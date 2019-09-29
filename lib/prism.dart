@@ -1,4 +1,4 @@
-library flutter_prism;
+library prism;
 
 export 'languages/json.dart';
 export 'languages/markup.dart';
