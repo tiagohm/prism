@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:prism/rule.dart';
+import 'package:prism/src/rule.dart';
 
 /// Representa um conjunto de regras que compõe uma linguagem.
 class Grammar extends MapBase<String, List<Rule>>

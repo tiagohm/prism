@@ -1,6 +1,6 @@
-import 'package:prism/grammar.dart';
-import 'package:prism/language.dart';
-import 'package:prism/rule.dart';
+import 'package:prism/src/grammar.dart';
+import 'package:prism/src/language.dart';
+import 'package:prism/src/rule.dart';
 
 class Markup extends Language {
   Markup() {

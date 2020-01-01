@@ -1,8 +1,0 @@
-<div class="test" foo bar=baz>
-<div foo='bar'>
-<div class="foo
-bar
-baz">
-<div foo:bar=42>
-<div foo = 42 bar = "42">
-<div foo="=\"bar=baz/>

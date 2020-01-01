@@ -1,14 +1,9 @@
-import 'package:prism/grammar.dart';
-import 'package:prism/rule.dart';
-import 'package:prism/span.dart';
-import 'package:prism/token.dart';
+import 'package:flutter/material.dart';
+import 'package:prism/src/grammar.dart';
+import 'package:prism/src/rule.dart';
+import 'package:prism/src/token.dart';
 
-typedef HighlightMapper<T> = T Function(
-  String name,
-  String text,
-  int start,
-  int end,
-);
+typedef Highlighter = TextStyle Function(String name);
 
 /// Representa uma linguagem.
 abstract class Language extends Grammar {
@@ -16,63 +11,40 @@ abstract class Language extends Grammar {
     Grammar rest,
   }) : super(rest: rest);
 
-  List<Span> highlightText(String text) => _highlight(tokenize(text), const {});
-
-  List<Span> _highlight(List<Token> tokens, Set<String> parents) {
-    final out = List<Span>();
-
-    for (final item in tokens) {
-      if (item is StringToken) {
-        // Nada.
-        if (item.value.length == 0) {
-          continue;
-        }
-        // Token.
-        else {
-          final name = parents.isNotEmpty ? parents.last : "text";
-
-          out.add(Span(
-            value: item.value,
-            aliases: {
-              ...parents,
-              name,
-            },
-          ));
-        }
-      }
-      // Composição de outros tokens.
-      else {
-        out.addAll(_highlight(item.content, {
-          if (parents.isNotEmpty) ...parents,
-          item.name,
-        }));
-      }
-    }
-
-    return out;
+  List<Token> tokenize(
+    String text,
+    Highlighter highlighter,
+  ) {
+    return _tokenize(
+      text: text,
+      grammar: this,
+      highlighter: highlighter,
+    );
   }
 
-  List<Token> tokenize(String text) => _tokenize(text: text, grammar: this);
-
-  List<Token> _tokenize({
+  static List<Token> _tokenize({
     String text,
     Grammar grammar,
+    Highlighter highlighter,
   }) {
     // rest representa o resto do rule que pode estar definido em outro lugar.
     if (grammar.rest != null) {
       grammar.combineWith(grammar.rest);
     }
 
-    final List buffer = <Token>[StringToken(text)];
+    final buffer = <Token>[StringToken(text)];
+
     _matchGrammar(
       text: text,
       buffer: buffer,
       grammar: grammar,
+      highlighter: highlighter,
     );
+
     return buffer;
   }
 
-  void _matchGrammar({
+  static void _matchGrammar({
     String text,
     List<Token> buffer,
     Grammar grammar,
@@ -80,6 +52,7 @@ abstract class Language extends Grammar {
     int startPos = 0,
     bool oneshot = false,
     String target,
+    Highlighter highlighter,
   }) {
     for (final item in grammar.entries) {
       final String name = item.key;
@@ -108,7 +81,7 @@ abstract class Language extends Grammar {
             continue;
           }
 
-          var str = (buffer[i] as StringToken).value;
+          var str = (buffer[i] as StringToken).text;
 
           // Something went terribly wrong, ABORT, ABORT!
           if (buffer.length > text.length) {
@@ -196,12 +169,21 @@ abstract class Language extends Grammar {
               text: matchStr,
               grammar: rule.inside,
             );
-          } else {
+          } else if (matchStr.isNotEmpty) {
             content = [StringToken(matchStr)];
+          } else {
+            content = const [];
           }
 
-          final token = RuleToken(rule, name, content, matchStr.length);
-          args.add(token);
+          if (content.isNotEmpty) {
+            final token = RuleToken(
+              rule.greedy,
+              matchStr.length,
+              content,
+              highlighter?.call(name),
+            );
+            args.add(token);
+          }
 
           if (after.isNotEmpty) {
             args.add(StringToken(after));

@@ -1,9 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:prism/flutter_prism.dart';
-import 'package:prism/languages/json.dart';
-import 'package:prism/languages/markup.dart';
+import 'dart:io';
 
-import 'utils.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:prism/prism.dart';
+import 'package:prism/src/token.dart';
 
 void main() {
   // https://github.com/PrismJS/prism/tree/master/tests/languages
@@ -12,22 +11,33 @@ void main() {
   final jsonWithComments = Json(allowComments: true);
   final markup = Markup();
 
-  group('Json', () {
-    testFeature(json, "Boolean");
-    testFeature(jsonWithComments, "Comment");
-    testFeature(json, "Number");
-    testFeature(json, "Null");
-    testFeature(json, "Property");
-    testFeature(json, "String");
-  });
+  test("Large text", () {
+    final sw = Stopwatch();
 
-  group('Markup', () {
-    testFeature(markup, "Tag");
-    testFeature(markup, "Tag Attribute");
-    testFeature(markup, "CDATA");
-    testFeature(markup, "Comment");
-    testFeature(markup, "Doctype");
-    testFeature(markup, "Entity");
-    testFeature(markup, "Prolog");
+    sw.start();
+    final spans = json.tokenize(
+      File("./large.json").readAsStringSync(),
+      (name) {
+        return null;
+      },
+    );
+    sw.stop();
+
+    print(countSpans(spans));
+    print(sw.elapsedMilliseconds);
   });
+}
+
+int countSpans(List<Token> tokens) {
+  var c = 0;
+
+  for (final token in tokens) {
+    if (token.children != null && token.children.isNotEmpty) {
+      c += countSpans(token.children);
+    }
+
+    c++;
+  }
+
+  return c;
 }

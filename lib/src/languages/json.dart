@@ -1,5 +1,5 @@
-import 'package:prism/language.dart';
-import 'package:prism/rule.dart';
+import 'package:prism/src/language.dart';
+import 'package:prism/src/rule.dart';
 
 class Json extends Language {
   Json({

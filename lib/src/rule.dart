@@ -1,4 +1,4 @@
-import 'package:prism/grammar.dart';
+import 'package:prism/src/grammar.dart';
 
 /// Representa uma regra.
 class Rule {
